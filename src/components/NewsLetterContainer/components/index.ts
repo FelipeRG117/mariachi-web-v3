@@ -1,3 +1,5 @@
-import InstagramConnectCard from "./InstagramConnectCard";
+/**
+ * NewsLetter Components Exports
+ */
 
-export { InstagramConnectCard };
+export { default as InstagramConnectCard } from './InstagramConnectCard'

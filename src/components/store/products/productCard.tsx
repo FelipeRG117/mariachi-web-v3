@@ -3,26 +3,53 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
+import { useCartStore } from "@/lib/store/cart-store"
+import type { Product as BackendProduct } from "@/types/business/product"
 
-interface Product {
-  id: number
-  name: string
-  price: number
-  category: string
-  image: string
-  soldOut?: boolean
-  badge?: string
-}
-
+// Unified product interface that works with both backend and legacy data
 interface ProductCardProps {
-  product: Product
+  product: BackendProduct
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const { addItem, openCart } = useCartStore()
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // Check if product is in stock
+    const isOutOfStock = product.status !== 'published' ||
+                         (product.variants && product.variants.length > 0 &&
+                          !product.variants.some(v => v.stock > 0))
+
+    if (isOutOfStock) return
+
+    setIsAdding(true)
+
+    // Product is already in the correct format from backend
+    addItem(product, 1)
+
+    // Brief delay for visual feedback
+    setTimeout(() => {
+      setIsAdding(false)
+      openCart() // Open mini cart drawer
+    }, 300)
+  }
+
+  // Check if product is out of stock
+  const isOutOfStock = product.status !== 'published' ||
+                       (product.variants && product.variants.length > 0 &&
+                        !product.variants.some(v => v.stock > 0))
+
+  // Get primary image
+  const primaryImage = product.images.find(img => img.isPrimary) || product.images[0]
+  const imageUrl = primaryImage?.url || "/placeholder.svg"
 
   return (
-    <Link href={`/tienda/${product.id}`} className="block">
+    <Link href={`/tienda/${product._id}`} className="block">
       <div
         className="group cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
@@ -31,16 +58,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Image Container */}
         <div className="relative aspect-square mb-4 overflow-hidden bg-gray-100 rounded">
           <Image
-            src={product.image || "/placeholder.svg"}
-            alt={product.name}
+            src={imageUrl}
+            alt={primaryImage?.altText || product.name}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
           />
 
-          {/* Badge */}
-          {product.badge && (
-            <div className="absolute top-3 left-3 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-              {product.badge}
+          {/* Badge for Featured/New products */}
+          {product.featured && (
+            <div className="absolute top-3 left-3 bg-[#d4a574] text-white text-xs font-bold px-3 py-1 rounded">
+              DESTACADO
             </div>
           )}
 
@@ -51,19 +78,27 @@ export default function ProductCard({ product }: ProductCardProps) {
             }`}
           >
             <button
-              onClick={(e) => {
-                e.preventDefault()
-                // Handle quick add to cart logic here
-              }}
-              className="w-full bg-white text-black py-3 rounded font-medium hover:bg-gray-100 transition-colors flex items-center justify-center gap-2"
-              disabled={product.soldOut}
+              onClick={handleAddToCart}
+              className={`w-full text-black py-3 rounded font-medium transition-colors flex items-center justify-center gap-2 ${
+                isAdding
+                  ? "bg-[#d4a574] text-white"
+                  : "bg-white hover:bg-gray-100"
+              }`}
+              disabled={isOutOfStock || isAdding}
             >
-              {product.soldOut ? (
+              {isOutOfStock ? (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                   Agotado
+                </>
+              ) : isAdding ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Agregando...
                 </>
               ) : (
                 <>

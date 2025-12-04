@@ -1,4 +1,4 @@
-import DataService from "@/lib/data"
+import { ProductService } from "@/lib/services"
 import ProductDetail from "@/components/store/products/productDetail"
 import { notFound } from "next/navigation"
 
@@ -8,8 +8,7 @@ export default async function ProductPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const products = await DataService.getProducts()
-  const product = products.find((p) => p.id === Number.parseInt(id))
+  const product = await ProductService.getById(Number.parseInt(id))
 
   if (!product) {
     notFound()

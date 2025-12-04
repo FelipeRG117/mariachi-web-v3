@@ -1,10 +1,10 @@
 import NavBar from "@/components/NavBar/NavBar"
-import DataService from "@/lib/data"
 import Image from "next/image"
 import VideoGalleryContainer from "@/components/VideoGalleryContainer"
 
 export default async function Gallery() {
-  const videos = await DataService.getVideosGallery()
+  // Video gallery data can be integrated here when needed
+  const videos: string[] = []
 
   return (
     <div className="bg-black min-h-screen">
@@ -48,7 +48,8 @@ export default async function Gallery() {
 }
 
 const GridPicturesGallery = async () => {
-  const pictures = await DataService.getPicturesGallery()
+  // Pictures gallery data can be integrated here when needed
+  const pictures: string[] = []
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {pictures.map((item, index) => {

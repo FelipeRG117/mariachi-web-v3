@@ -1,11 +1,11 @@
-import DataService from "@/lib/data"
+import { ConcertService, AnnouncementService } from "@/lib/services"
 import NextConcertsList from "@/components/NextConcertsList"
 import { AnnouncementModalWrapper } from "@/components/AnnouncementModal"
 import Link from "next/link"
 
 export default async function ConcertsPage() {
-  const concerts = await DataService.getConcerts()
-  const announcement = await DataService.getAnnouncementForPage('conciertos')
+  const concerts = await ConcertService.getUpcoming()
+  const announcement = await AnnouncementService.getForPage('conciertos')
 
   return (
     <div className="w-full min-h-screen bg-[#e8e6e1] text-black">

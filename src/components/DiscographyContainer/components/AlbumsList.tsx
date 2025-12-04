@@ -1,7 +1,7 @@
 'use client'
 import { List } from 'antd'
 import AlbumCard from './AlbumCard'
-import { Album } from '@/lib/data/albums'
+import type { Album } from '@/types/business/album.types'
 
 export default function AlbumsList({ albums }: { albums: Album[] }) {
 

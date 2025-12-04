@@ -1,8 +1,8 @@
-import DataService from "@/lib/data"
+import { AlbumService } from "@/lib/services"
 import { AlbumCard, SectionBanner } from "@/components/DiscographyContainer/components"
 
 export default async function DiscographyContainer() {
-  const albums = await DataService.getAlbums()
+  const albums = await AlbumService.getAll('newest')
 
   return (
     <div className="bg-[#1a1a1a]">

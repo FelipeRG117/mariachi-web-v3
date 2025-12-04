@@ -1,9 +1,9 @@
 import StoreComponent from "@/components/store/storeComponent";
 import { AnnouncementModalWrapper } from "@/components/AnnouncementModal";
-import DataService from "@/lib/data";
+import { AnnouncementService } from "@/lib/services";
 
 export default async function tiendaPage() {
-  const announcement = await DataService.getAnnouncementForPage('tienda')
+  const announcement = await AnnouncementService.getForPage('tienda')
 
   return (
     <div>

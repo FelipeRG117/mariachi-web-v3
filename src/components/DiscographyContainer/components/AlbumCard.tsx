@@ -1,6 +1,6 @@
 "use client"
 
-import { Album } from "@/lib/data/albums"
+import type { Album } from "@/types/business/album.types"
 import Image from "next/image"
 
 export default function AlbumCard({ album }: { album: Album }) {

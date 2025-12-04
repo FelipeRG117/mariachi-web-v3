@@ -21,3 +21,17 @@
 .text-display { font-size: 3rem; }
 .text-heading { font-size: 2rem; }
 .text-tiny { font-size: 0.75rem; }
+
+/* Shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}

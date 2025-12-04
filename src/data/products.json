@@ -1,0 +1,100 @@
+[
+  {
+    "id": 1,
+    "name": "Another One 10th Anniversary Vinyl",
+    "price": 43.98,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/vinyl-record-album-cover-vintage-1990.jpg",
+    "soldOut": true,
+    "badge": "SOLD OUT",
+    "description": "Edición especial del 10º aniversario del álbum icónico Another One. Vinilo de alta calidad en color negro con arte exclusivo.",
+    "sizes": ["12\" Black Vinyl"],
+    "tracklist": [
+      "The Way You'd Love Her",
+      "Another One",
+      "No Other Heart",
+      "Just to Put Me Down",
+      "A Heart Like Hers",
+      "I've Been Waiting for Her",
+      "Without Me",
+      "My House by the Water"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Guitar 12\" Yellow LP",
+    "price": 26.98,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/music-album-cover-portrait-artist-1992.jpg",
+    "description": "Vinilo amarillo edición limitada con diseño exclusivo de guitarra. Perfecto para coleccionistas.",
+    "sizes": ["12\" Yellow Vinyl"]
+  },
+  {
+    "id": 3,
+    "name": "Guitar 12\" Black LP",
+    "price": 26.98,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/live-concert-album-cover-stage-lights.jpg",
+    "description": "Vinilo negro clásico con el icónico diseño de guitarra de Luis Carlos Gago.",
+    "sizes": ["12\" Black Vinyl"]
+  },
+  {
+    "id": 4,
+    "name": "Guitar White T-Shirt",
+    "price": 30.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/concert-stage-lights-performer.jpg",
+    "description": "Camiseta blanca de algodón 100% con diseño de guitarra frontal. Corte unisex cómodo.",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["Blanco"]
+  },
+  {
+    "id": 5,
+    "name": "Guitar White Dad Hat",
+    "price": 30.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/musician-with-guitar-backstage.jpg",
+    "description": "Gorra estilo dad hat en color blanco con bordado de guitarra. Ajuste de correa trasera.",
+    "sizes": ["One Size"],
+    "colors": ["Blanco"]
+  },
+  {
+    "id": 6,
+    "name": "MRL Hockey Jersey",
+    "price": 200.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/crowd-at-concert-venue.jpg",
+    "description": "Jersey de hockey oficial de Luis Carlos Gago Racing League. Edición limitada de alta calidad con números bordados.",
+    "sizes": ["S", "M", "L", "XL", "XXL"]
+  },
+  {
+    "id": 7,
+    "name": "Black Hoodie",
+    "price": 55.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/artist-performing-on-stage-spotlight.jpg",
+    "description": "Sudadera negra con capucha de algodón premium. Diseño minimalista con logo frontal.",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["Negro"]
+  },
+  {
+    "id": 8,
+    "name": "Blue Hoodie",
+    "price": 55.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/recording-studio-musician.jpg",
+    "description": "Sudadera azul con capucha de algodón premium. Diseño exclusivo de la gira 2024.",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["Azul"]
+  },
+  {
+    "id": 9,
+    "name": "Gray Hoodie",
+    "price": 55.0,
+    "category": "LUIS CARLOS GAGO",
+    "image": "/band-rehearsal-black-and-white.jpg",
+    "description": "Sudadera gris con capucha de algodón premium. Estampado vintage en el pecho.",
+    "sizes": ["S", "M", "L", "XL", "XXL"],
+    "colors": ["Gris"]
+  }
+]

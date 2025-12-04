@@ -1,8 +1,8 @@
-import DataService from "@/lib/data";
+import { ConcertService } from "@/lib/services";
 import { NextConcertsList } from ".";
 
 export default async function NextConcertsComponentContainer() {
-  const concerts = await DataService.getConcerts()
+  const concerts = await ConcertService.getUpcoming()
 
   return (
     <div className="w-full min-h-screen bg-[#e8e6e1] text-black">

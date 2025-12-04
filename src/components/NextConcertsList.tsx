@@ -1,6 +1,6 @@
 "use client"
 
-import { Concert } from "@/lib/data/concerts"
+import type { Concert } from "@/types/business/concert.types"
 
 export default function NextConcertsList({ concerts }: { concerts: Concert[] }) {
   return (

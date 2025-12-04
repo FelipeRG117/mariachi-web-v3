@@ -1,14 +1,13 @@
 import { HomeContainer } from "@/components";
-import DataService from "@/lib/data";
 
 export const metadata = {
-  title: "Juan Pérez - Artista Oficial",
-  description: "Sitio oficial de Juan Pérez. Últimas canciones, conciertos y noticias.",
+  title: "Luis Carlos Gago - Artista Oficial",
+  description: "Sitio oficial de Luis Carlos Gago. Últimas canciones, conciertos y noticias.",
   openGraph: {
-    title: "Juan Pérez - Artista Oficial",
-    description: "Sitio oficial de Juan Pérez. Últimas canciones, conciertos y noticias.",
+    title: "Luis Carlos Gago - Artista Oficial",
+    description: "Sitio oficial de Luis Carlos Gago. Últimas canciones, conciertos y noticias.",
     image: "/images/hero-image.jpg",
-    url: "https://juanperez.com",
+    url: "https://luiscarlosgago.com",
   },
   twitter: {
     card: "summary_large_image",
@@ -16,13 +15,12 @@ export const metadata = {
 };
 
 export default async function Home() {
-  const sanityData = await DataService.getSanityData();
-
-  console.log('sanityData', sanityData);
+  // Sanity data integration can be added here when needed
+  // const sanityData = await SanityService.getData();
 
   return (
     <div className="bg-white">
-            <HomeContainer/>
-        </div>
+      <HomeContainer />
+    </div>
   );
 }

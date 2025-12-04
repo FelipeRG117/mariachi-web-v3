@@ -1,9 +1,7 @@
-import SectionBanner from "../../common/SectionBanner";
-import AlbumCard from "./AlbumCard";
-import AlbumsList from "./AlbumsList";
-import Banner from "./Banner";
-import DiscografiaBanner from "./DiscographyBanner";
-import LastReleasesCarousel from "./LastReleasesCarousel";
+/**
+ * Discography Components Exports
+ */
 
-
-export { AlbumCard, AlbumsList, Banner, DiscografiaBanner, SectionBanner, LastReleasesCarousel };
+export { default as AlbumCard } from './AlbumCard'
+export { default as AlbumsList } from './AlbumsList'
+export { default as SectionBanner } from '../../common/SectionBanner'
