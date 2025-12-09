@@ -149,3 +149,43 @@ export function getTotalStock(product: Product): number {
     return total + variant.inventory.stock
   }, 0)
 }
+
+/**
+ * Product filter options
+ *
+ * Options for filtering product listings.
+ */
+export interface ProductFilters {
+  /** Filter by category */
+  category?: ProductCategory
+  /** Filter by price range */
+  priceRange?: {
+    min: number
+    max: number
+  }
+  /** Filter by size */
+  size?: string
+  /** Filter by color */
+  color?: string
+  /** Only show in-stock products */
+  inStockOnly?: boolean
+  /** Search query */
+  searchQuery?: string
+  /** Filter by status */
+  status?: ProductStatus
+  /** Filter by featured */
+  isFeatured?: boolean
+  /** Filter by new arrivals */
+  isNewArrival?: boolean
+}
+
+/**
+ * Product sort options
+ */
+export type ProductSortBy =
+  | 'price-asc'
+  | 'price-desc'
+  | 'name-asc'
+  | 'name-desc'
+  | 'newest'
+  | 'popular'

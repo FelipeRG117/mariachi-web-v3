@@ -15,19 +15,7 @@
  */
 
 import { productsService } from '@/lib/api/products.service'
-import type { Product } from '@/types/business/product'
-import type { ProductCategory, ProductFilters } from '@/types/business/product.types'
-
-/**
- * Product sort options
- */
-export type ProductSortBy =
-  | 'price-asc'
-  | 'price-desc'
-  | 'name-asc'
-  | 'name-desc'
-  | 'newest'
-  | 'popular'
+import type { Product, ProductFilters, ProductSortBy } from '@/types/business/product'
 
 /**
  * Product statistics
