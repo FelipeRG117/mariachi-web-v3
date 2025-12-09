@@ -4,8 +4,10 @@ import type React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
-import { CreditCard, Bitcoin } from "lucide-react"
+import { CreditCard, Bitcoin, Loader2 } from "lucide-react"
 import { useCartStore } from "@/lib/store/cart-store"
+import { getProductPrice } from "@/types/business/product"
+import { checkoutWithStripe } from "@/lib/stripe/stripe"
 
 export default function CheckoutComponent() {
   const { items, getSummary } = useCartStore()
@@ -13,13 +15,15 @@ export default function CheckoutComponent() {
 
   const [deliveryMethod, setDeliveryMethod] = useState<"ship" | "pickup">("ship")
   const [paymentMethod, setPaymentMethod] = useState<"credit_card" | "stripe" | "mercado_pago" | "bitcoin">(
-    "credit_card",
+    "stripe",
   )
   const [emailOffers, setEmailOffers] = useState(false)
   const [textOffers, setTextOffers] = useState(false)
   const [useSameAddress, setUseSameAddress] = useState(true)
   const [rememberMe, setRememberMe] = useState(false)
   const [discountCode, setDiscountCode] = useState("")
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     email: "",
@@ -44,9 +48,43 @@ export default function CheckoutComponent() {
     billingCountry: "Mexico",
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] Checkout submission:", formData, { deliveryMethod, paymentMethod })
+    setError(null)
+
+    // Validate email
+    if (!formData.email || !formData.email.includes('@')) {
+      setError('Por favor ingresa un email válido')
+      return
+    }
+
+    // Validate cart has items
+    if (items.length === 0) {
+      setError('Tu carrito está vacío')
+      return
+    }
+
+    try {
+      setIsProcessing(true)
+
+      // Create checkout session and redirect to Stripe
+      await checkoutWithStripe({
+        items,
+        customerEmail: formData.email,
+        metadata: {
+          deliveryMethod,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+        },
+      })
+
+      // Redirect happens automatically via Stripe
+    } catch (err) {
+      console.error('Checkout error:', err)
+      setError('Error al procesar el pago. Por favor intenta de nuevo.')
+      setIsProcessing(false)
+    }
   }
 
   return (
@@ -435,15 +473,29 @@ export default function CheckoutComponent() {
                 </label>
               </div>
 
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-[#d4a574] text-white py-4 px-6 font-bold tracking-widest uppercase hover:bg-black transition-colors duration-300"
+                disabled={isProcessing || items.length === 0}
+                className="w-full bg-[#d4a574] text-white py-4 px-6 font-bold tracking-widest uppercase hover:bg-black transition-colors duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Complete Order
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  'Pagar con Stripe'
+                )}
               </button>
 
               <p className="text-xs text-center text-gray-500">
-                Secure and encrypted. Your info will be saved to a Shop account.
+                Pago seguro procesado por Stripe. Tus datos están protegidos.
               </p>
             </form>
           </div>
@@ -483,7 +535,7 @@ export default function CheckoutComponent() {
                         <h3 className="font-medium text-sm">{item.product.name}</h3>
                         <p className="text-xs text-gray-500 mt-1 uppercase">{item.product.category}</p>
                       </div>
-                      <p className="font-bold">${(item.product.price * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold">${(getProductPrice(item.product) * item.quantity).toFixed(2)}</p>
                     </div>
                   ))}
                 </div>

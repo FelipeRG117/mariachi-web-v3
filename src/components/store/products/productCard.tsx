@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { useCartStore } from "@/lib/store/cart-store"
 import type { Product as BackendProduct } from "@/types/business/product"
+import { isProductAvailable, getProductPrice } from "@/types/business/product"
 
 // Unified product interface that works with both backend and legacy data
 interface ProductCardProps {
@@ -16,16 +17,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   const [isAdding, setIsAdding] = useState(false)
   const { addItem, openCart } = useCartStore()
 
+  // Check if product is available
+  const isAvailable = isProductAvailable(product)
+  const price = getProductPrice(product)
+
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
-    // Check if product is in stock
-    const isOutOfStock = product.status !== 'published' ||
-                         (product.variants && product.variants.length > 0 &&
-                          !product.variants.some(v => v.stock > 0))
-
-    if (isOutOfStock) return
+    if (!isAvailable) return
 
     setIsAdding(true)
 
@@ -38,11 +38,6 @@ export default function ProductCard({ product }: ProductCardProps) {
       openCart() // Open mini cart drawer
     }, 300)
   }
-
-  // Check if product is out of stock
-  const isOutOfStock = product.status !== 'published' ||
-                       (product.variants && product.variants.length > 0 &&
-                        !product.variants.some(v => v.stock > 0))
 
   // Get primary image
   const primaryImage = product.images.find(img => img.isPrimary) || product.images[0]
@@ -65,9 +60,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
 
           {/* Badge for Featured/New products */}
-          {product.featured && (
+          {product.isFeatured && (
             <div className="absolute top-3 left-3 bg-[#d4a574] text-white text-xs font-bold px-3 py-1 rounded">
               DESTACADO
+            </div>
+          )}
+          {product.isNewArrival && !product.isFeatured && (
+            <div className="absolute top-3 left-3 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded">
+              NUEVO
             </div>
           )}
 
@@ -84,9 +84,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                   ? "bg-[#d4a574] text-white"
                   : "bg-white hover:bg-gray-100"
               }`}
-              disabled={isOutOfStock || isAdding}
+              disabled={!isAvailable || isAdding}
             >
-              {isOutOfStock ? (
+              {!isAvailable ? (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -121,7 +121,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="space-y-2">
           <p className="text-xs text-gray-500 uppercase tracking-wider">{product.category}</p>
           <h3 className="text-base font-medium text-gray-900 line-clamp-2 min-h-[3rem]">{product.name}</h3>
-          <p className="text-lg font-semibold text-gray-900">${product.price.toFixed(2)}</p>
+          <p className="text-lg font-semibold text-gray-900">${price.toFixed(2)} MXN</p>
         </div>
       </div>
     </Link>

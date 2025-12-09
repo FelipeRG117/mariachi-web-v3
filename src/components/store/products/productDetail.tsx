@@ -1,48 +1,126 @@
+
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
-import { ChevronLeft, Minus, Plus, Share2 } from "lucide-react"
+
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
+import { ChevronLeft, Minus, Plus, Share2 } from "lucide-react";
+
+
+// Modelo realista según backend
+
+interface ProductImage {
+  url: string;
+  publicId?: string;
+  altText?: string;
+  isPrimary?: boolean;
+  order?: number;
+}
+
+
+interface ProductVariant {
+  name: string;
+  sku?: string;
+  pricing?: {
+    basePrice: number;
+    [key: string]: number | undefined;
+  };
+  price?: number; // fallback for legacy
+  stock: number;
+  attributes?: {
+    size?: string;
+    color?: string;
+    [key: string]: string | undefined;
+  };
+}
+
 
 interface Product {
-  id: number
-  name: string
-  price: number
-  category: string
-  image: string
-  soldOut?: boolean
-  badge?: string
-  description?: string
-  sizes?: string[]
-  colors?: string[]
-  tracklist?: string[]
-  format?: string
-  material?: string
-  care?: string
+  _id: string;
+  name: string;
+  price?: number; // fallback for legacy
+  category: string;
+  images?: ProductImage[];
+  variants?: ProductVariant[];
+  status: "draft" | "published" | "archived";
+  featured?: boolean;
+  badge?: string;
+  description?: string;
+  tracklist?: string[];
+  format?: string;
+  material?: string;
+  care?: string;
 }
+
 
 interface ProductDetailProps {
-  product: Product
+  product: Product;
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
-  const [quantity, setQuantity] = useState(1)
-  const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || "")
-  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || "")
-  const [selectedImage, setSelectedImage] = useState(0)
- 
-  // Mock multiple images (in real scenario, product would have multiple images)
-  const productImages = [product.image, product.image]
 
-  const handleQuantityChange = (delta: number) => {
-    const newQuantity = quantity + delta
-    if (newQuantity >= 1 && newQuantity <= 10) {
-      setQuantity(newQuantity)
-    }
+
+export default function ProductDetail({ product }: ProductDetailProps) {
+  // Defensive checks for product
+  if (!product || typeof product !== "object" || !product._id) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Producto no encontrado</h2>
+          <Link href="/tienda" className="text-blue-600 underline">Volver a la tienda</Link>
+        </div>
+      </div>
+    );
   }
 
+  // Estado para cantidad e imagen seleccionada
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedImage, setSelectedImage] = useState<number>(0);
 
+  // Validación y extracción de tallas/colores
+  const variants = Array.isArray(product.variants) ? product.variants : [];
+  const allSizes: string[] = Array.from(new Set(variants.map(v => v.attributes?.size).filter(Boolean)));
+  const allColors: string[] = Array.from(new Set(variants.map(v => v.attributes?.color).filter(Boolean)));
+
+  // Estado para talla y color seleccionados
+  const [selectedSize, setSelectedSize] = useState<string>(allSizes[0] || "");
+  const [selectedColor, setSelectedColor] = useState<string>(allColors[0] || "");
+
+  // Filtrar variante seleccionada según talla y color
+  const getSelectedVariant = (): ProductVariant | null => {
+    if (variants.length === 0) return null;
+    const found = variants.find(v => {
+      const sizeMatch = selectedSize ? v.attributes?.size === selectedSize : true;
+      const colorMatch = selectedColor ? v.attributes?.color === selectedColor : true;
+      return sizeMatch && colorMatch;
+    });
+    return found ?? variants[0] ?? null;
+  };
+  const selectedVariant = getSelectedVariant();
+
+  // Imágenes ordenadas: primaria primero, luego por orden
+  const productImages: ProductImage[] = Array.isArray(product.images)
+    ? [...product.images].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0) || (a.order ?? 0) - (b.order ?? 0))
+    : [];
+
+  // Lógica de precio: preferir pricing.basePrice de la variante, luego price de variante, luego price de producto
+  const getDisplayPrice = (): number => {
+    if (selectedVariant?.pricing?.basePrice != null) return selectedVariant.pricing.basePrice;
+    if (typeof selectedVariant?.price === "number") return selectedVariant.price;
+    if (typeof product.price === "number") return product.price;
+    return 0;
+  };
+  const displayPrice = getDisplayPrice();
+
+  // Cambiar cantidad, validando stock
+  const handleQuantityChange = (delta: number) => {
+    if (!selectedVariant) return;
+    const newQuantity = quantity + delta;
+    const maxStock = typeof selectedVariant.stock === "number" ? selectedVariant.stock : 10;
+    if (newQuantity >= 1 && newQuantity <= maxStock) {
+      setQuantity(newQuantity);
+    }
+  };
 
   return (
     <div className="bg-white min-h-screen">
@@ -74,8 +152,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Main Image */}
             <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
               <Image
-                src={productImages[selectedImage] || "/placeholder.svg"}
-                alt={product.name}
+                src={productImages[selectedImage]?.url || "/placeholder.svg"}
+                alt={productImages[selectedImage]?.altText || product.name}
                 fill
                 className="object-cover"
                 priority
@@ -97,7 +175,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     selectedImage === idx ? "border-black" : "border-transparent hover:border-gray-300"
                   }`}
                 >
-                  <Image src={img || "/placeholder.svg"} alt={`Vista ${idx + 1}`} fill className="object-cover" />
+                  <Image src={img.url || "/placeholder.svg"} alt={img.altText || `Vista ${idx + 1}`} fill className="object-cover" />
                 </button>
               ))}
             </div>
@@ -111,7 +189,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               <h1 className="text-4xl lg:text-5xl font-light text-black tracking-wide leading-tight mb-4">
                 {product.name}
               </h1>
-              <p className="text-3xl font-light text-black">${product.price.toFixed(2)}</p>
+              <p className="text-3xl font-light text-black">${displayPrice.toFixed(2)}</p>
             </div>
 
             {/* Divider */}
@@ -128,7 +206,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             )}
 
             {/* Size Selection (para ropa) */}
-            {product.sizes && product.sizes.length > 0 && !product.format && (
+            {allSizes.length > 0 && !product.format && (
               <div>
                 <label className="block text-sm font-medium text-black mb-3 tracking-wider">Talla:</label>
                 <select
@@ -136,7 +214,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   onChange={(e) => setSelectedSize(e.target.value)}
                   className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black transition-all"
                 >
-                  {product.sizes.map((size) => (
+                  {allSizes.map((size) => (
                     <option key={size} value={size}>
                       {size}
                     </option>
@@ -146,7 +224,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             )}
 
             {/* Color Selection */}
-            {product.colors && product.colors.length > 0 && (
+            {allColors.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-black mb-3 tracking-wider">Color:</label>
                 <select
@@ -154,7 +232,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   onChange={(e) => setSelectedColor(e.target.value)}
                   className="w-full bg-white text-black border border-gray-300 rounded px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black transition-all"
                 >
-                  {product.colors.map((color) => (
+                  {allColors.map((color) => (
                     <option key={color} value={color}>
                       {color}
                     </option>
@@ -182,7 +260,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 />
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= 10}
+                  disabled={quantity >= (selectedVariant?.stock ?? 10)}
                   className="w-12 h-12 flex items-center justify-center border border-gray-600 rounded hover:border-[#d4a574] hover:text-[#d4a574] disabled:opacity-30 disabled:cursor-not-allowed text-black transition-all"
                 >
                   <Plus className="w-5 h-5" />
@@ -190,20 +268,26 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </div>
             </div>
 
-            {/* Add to Cart Button */}
-            <button
-              disabled={product.soldOut}
-              className={`w-full py-4 rounded font-medium tracking-wider transition-all ${
-                product.soldOut
-                  ? "bg-gray-400 text-gray-700 cursor-not-allowed"
-                  : "bg-blue-500 text-white hover:bg-blue-600"
-              }`}
-            >
-              {product.soldOut ? "AGOTADO" : "AGREGAR AL CARRITO"}
-            </button>
+            {/* Add to Cart Button y validación de variantes */}
+            {selectedVariant ? (
+              <button
+                disabled={selectedVariant.stock === 0}
+                className={`w-full py-4 rounded font-medium tracking-wider transition-all ${
+                  selectedVariant.stock === 0
+                    ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                    : "bg-blue-500 text-white hover:bg-blue-600"
+                }`}
+              >
+                {selectedVariant.stock === 0 ? "AGOTADO" : "AGREGAR AL CARRITO"}
+              </button>
+            ) : (
+              <div className="w-full py-4 rounded font-medium text-center bg-gray-200 text-gray-600">
+                No hay variantes disponibles para este producto.
+              </div>
+            )}
 
             {/* Pickup Info */}
-            {!product.soldOut && (
+            {selectedVariant && selectedVariant.stock > 0 && (
               <div className="flex items-start gap-3 bg-gray-900 rounded p-4">
                 <svg
                   className="w-5 h-5 text-[#d4a574] mt-0.5 flex-shrink-0"
@@ -278,5 +362,5 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

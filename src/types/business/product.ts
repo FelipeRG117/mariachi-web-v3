@@ -17,35 +17,59 @@ export interface ProductImage {
 }
 
 /**
- * Product Variant (size, color, etc.)
+ * Product Variant
  */
 export interface ProductVariant {
+  _id?: string
+  sku: string
   name: string
-  sku?: string
-  price?: number
-  stock: number
   attributes: {
     size?: string
     color?: string
-    [key: string]: any
+    material?: string
+    custom?: Record<string, string>
   }
+  pricing: {
+    basePrice: number
+    salePrice?: number
+    currency: string
+    costPrice?: number
+  }
+  inventory: {
+    stock: number
+    lowStockThreshold: number
+    trackInventory: boolean
+    allowBackorder: boolean
+  }
+  images?: ProductImage[]
+  weight?: {
+    value: number
+    unit: string
+  }
+  dimensions?: {
+    length: number
+    width: number
+    height: number
+    unit: string
+  }
+  isActive: boolean
 }
 
 /**
  * Product Category
  */
 export type ProductCategory =
-  | 'instruments'
-  | 'clothing'
+  | 'apparel'
   | 'accessories'
-  | 'merch'
   | 'music'
+  | 'instruments'
+  | 'collectibles'
   | 'other'
 
 /**
  * Product Status
  */
-export type ProductStatus = 'draft' | 'published' | 'archived'
+export type ProductStatus = 'draft' | 'published' | 'archived' | 'out_of_stock'
 
 /**
  * Product Entity (from backend API)
@@ -55,38 +79,73 @@ export interface Product {
   name: string
   slug: string
   description: string
-  price: number
+  shortDescription?: string
   category: ProductCategory
-  images: ProductImage[]
-  variants: ProductVariant[]
-  status: ProductStatus
-  featured?: boolean
+  subcategory?: string
   tags?: string[]
-  metadata?: {
-    weight?: number
-    dimensions?: {
-      length: number
-      width: number
-      height: number
+  variants: ProductVariant[]
+  images: ProductImage[]
+  brand?: string
+  seo?: {
+    metaTitle?: string
+    metaDescription?: string
+    keywords?: string[]
+  }
+  features?: string[]
+  specifications?: Record<string, string>
+  status: ProductStatus
+  isFeatured: boolean
+  isNewArrival: boolean
+  shipping?: {
+    isFreeShipping: boolean
+    shippingClass?: string
+  }
+  metrics?: {
+    rating?: {
+      average: number
+      count: number
     }
-    [key: string]: any
+    views: number
+    sales: number
   }
   createdAt: string
   updatedAt: string
 }
 
 /**
- * Helper type guards
+ * Helper type guards and functions
  */
 export function isProductPublished(product: Product): boolean {
   return product.status === 'published'
 }
 
 export function hasStock(product: Product): boolean {
-  if (!product.variants || product.variants.length === 0) return true
-  return product.variants.some(v => v.stock > 0)
+  if (!product.variants || product.variants.length === 0) return false
+  return product.variants.some(v =>
+    v.isActive &&
+    (!v.inventory.trackInventory || v.inventory.stock > 0 || v.inventory.allowBackorder)
+  )
 }
 
 export function isProductAvailable(product: Product): boolean {
   return isProductPublished(product) && hasStock(product)
+}
+
+/**
+ * Get product price (from first active variant)
+ */
+export function getProductPrice(product: Product): number {
+  const activeVariant = product.variants.find(v => v.isActive)
+  if (!activeVariant) return 0
+  return activeVariant.pricing.salePrice || activeVariant.pricing.basePrice
+}
+
+/**
+ * Get total stock across all variants
+ */
+export function getTotalStock(product: Product): number {
+  return product.variants.reduce((total, variant) => {
+    if (!variant.inventory.trackInventory) return total + 999 // Treat as unlimited
+    return total + variant.inventory.stock
+  }, 0)
 }

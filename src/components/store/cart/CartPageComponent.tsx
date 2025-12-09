@@ -4,6 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react"
 import { useCartStore } from "@/lib/store/cart-store"
+import { getProductPrice } from "@/types/business/product"
 
 export default function CartPageComponent() {
   const { items, removeItem, updateQuantity, getSummary, clearCart } = useCartStore()
@@ -127,11 +128,11 @@ export default function CartPageComponent() {
                     {/* Price */}
                     <div className="text-right">
                       <p className="text-lg font-bold text-gray-900">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        ${(getProductPrice(item.product) * item.quantity).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
                         <p className="text-sm text-gray-500">
-                          ${item.product.price.toFixed(2)} c/u
+                          ${getProductPrice(item.product).toFixed(2)} c/u
                         </p>
                       )}
                     </div>

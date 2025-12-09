@@ -15,6 +15,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { CartStore, CartItem, CartSummary } from '@/types/cart';
 import type { Product } from '@/types/business/product';
+import { getProductPrice } from '@/types/business/product';
 
 /**
  * Tax rate (16% IVA for Mexico)
@@ -147,7 +148,7 @@ export const useCartStore = create<CartStore>()(
        */
       getSubtotal: () => {
         return get().items.reduce(
-          (total, item) => total + item.product.price * item.quantity,
+          (total, item) => total + getProductPrice(item.product) * item.quantity,
           0
         );
       },
@@ -169,7 +170,7 @@ export const useCartStore = create<CartStore>()(
 
         // Calculate subtotal
         const subtotal = items.reduce(
-          (total, item) => total + item.product.price * item.quantity,
+          (total, item) => total + getProductPrice(item.product) * item.quantity,
           0
         );
 

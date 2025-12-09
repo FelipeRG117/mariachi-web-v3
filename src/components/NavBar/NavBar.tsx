@@ -1,14 +1,21 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ShoppingCart, User } from "lucide-react"
 import { useCartItemCount, useCartStore } from "@/lib/store/cart-store"
+import { getProductPrice } from "@/types/business/product"
 
 export default function NavBar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const itemCount = useCartItemCount()
   const { isOpen: isCartOpen, toggleCart, closeCart, items, getTotal, removeItem } = useCartStore()
+
+  // Prevent hydration mismatch by waiting for client mount
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <>
@@ -71,7 +78,7 @@ export default function NavBar() {
                 aria-label="Shopping cart"
               >
                 <ShoppingCart className="w-5 h-5" />
-                {itemCount > 0 && (
+                {mounted && itemCount > 0 && (
                   <span className="absolute -top-2 -right-2 bg-[#d4a574] text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     {itemCount}
                   </span>
@@ -156,7 +163,7 @@ export default function NavBar() {
                   className="relative hover:text-[#d4a574] transition-colors duration-300"
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  {itemCount > 0 && (
+                  {mounted && itemCount > 0 && (
                     <span className="absolute -top-2 -right-2 bg-[#d4a574] text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                       {itemCount}
                     </span>
@@ -208,7 +215,7 @@ export default function NavBar() {
                       <div className="flex-1">
                         <h3 className="font-medium text-sm">{item.product.name}</h3>
                         <p className="text-sm text-gray-500 mt-1">Cantidad: {item.quantity}</p>
-                        <p className="font-bold mt-2">${(item.product.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-bold mt-2">${(getProductPrice(item.product) * item.quantity).toFixed(2)}</p>
                       </div>
                       <button
                         onClick={() => removeItem(item.product._id)}

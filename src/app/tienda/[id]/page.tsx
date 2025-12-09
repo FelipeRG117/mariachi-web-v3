@@ -7,16 +7,22 @@ export default async function ProductPage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { id } = await params
-  const product = await ProductService.getById(Number.parseInt(id))
+  // Next.js 15: params es una promesa que debe ser esperada
+  const { id } = await params;
+  // Validar formato de ObjectId antes de llamar al backend
+  const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+  if (!isValidObjectId) {
+    notFound();
+  }
+  const product = await ProductService.getById(id);
 
   if (!product) {
-    notFound()
+    notFound();
   }
 
   return (
     <div className="min-h-screen bg-white">
       <ProductDetail product={product} />
     </div>
-  )
+  );
 }
