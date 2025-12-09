@@ -138,7 +138,7 @@ export const apiRequest = {
   /**
    * POST request
    */
-  post: async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
+  post: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
     const response = await apiClient.post<ApiResponse<T>>(url, data, config)
     return response.data.data
   },
@@ -146,7 +146,7 @@ export const apiRequest = {
   /**
    * PUT request
    */
-  put: async <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
+  put: async <T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> => {
     const response = await apiClient.put<ApiResponse<T>>(url, data, config)
     return response.data.data
   },

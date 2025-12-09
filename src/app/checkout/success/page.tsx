@@ -1,18 +1,25 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, Loader2, Package, Mail } from 'lucide-react'
 import { getCheckoutSession } from '@/lib/stripe/stripe'
 import { useCartStore } from '@/lib/store/cart-store'
 
+interface SessionData {
+  id: string
+  paymentStatus: string
+  customerEmail?: string
+  amountTotal?: number
+  currency?: string
+}
+
 export default function CheckoutSuccessPage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const { clearCart } = useCartStore()
 
-  const [sessionData, setSessionData] = useState<any>(null)
+  const [sessionData, setSessionData] = useState<SessionData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,7 +36,7 @@ export default function CheckoutSuccessPage() {
     const fetchSession = async () => {
       try {
         const data = await getCheckoutSession(sessionId)
-        setSessionData(data)
+        setSessionData(data as SessionData)
 
         // Clear cart after successful payment
         clearCart()

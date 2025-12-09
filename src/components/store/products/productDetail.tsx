@@ -1,4 +1,3 @@
-
 "use client"
 
 
@@ -61,7 +60,21 @@ interface ProductDetailProps {
 
 
 export default function ProductDetail({ product }: ProductDetailProps) {
-  // Defensive checks for product
+  // IMPORTANT: All hooks must be called BEFORE any conditional returns
+  // Estado para cantidad e imagen seleccionada
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedImage, setSelectedImage] = useState<number>(0);
+
+  // Validación y extracción de tallas/colores
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  const allSizes: string[] = Array.from(new Set(variants.map(v => v.attributes?.size).filter(Boolean) as string[]));
+  const allColors: string[] = Array.from(new Set(variants.map(v => v.attributes?.color).filter(Boolean) as string[]));
+
+  // Estado para talla y color seleccionados
+  const [selectedSize, setSelectedSize] = useState<string>(allSizes[0] || "");
+  const [selectedColor, setSelectedColor] = useState<string>(allColors[0] || "");
+
+  // Defensive checks for product (AFTER all hooks)
   if (!product || typeof product !== "object" || !product._id) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
@@ -72,19 +85,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       </div>
     );
   }
-
-  // Estado para cantidad e imagen seleccionada
-  const [quantity, setQuantity] = useState<number>(1);
-  const [selectedImage, setSelectedImage] = useState<number>(0);
-
-  // Validación y extracción de tallas/colores
-  const variants = Array.isArray(product.variants) ? product.variants : [];
-  const allSizes: string[] = Array.from(new Set(variants.map(v => v.attributes?.size).filter(Boolean)));
-  const allColors: string[] = Array.from(new Set(variants.map(v => v.attributes?.color).filter(Boolean)));
-
-  // Estado para talla y color seleccionados
-  const [selectedSize, setSelectedSize] = useState<string>(allSizes[0] || "");
-  const [selectedColor, setSelectedColor] = useState<string>(allColors[0] || "");
 
   // Filtrar variante seleccionada según talla y color
   const getSelectedVariant = (): ProductVariant | null => {
