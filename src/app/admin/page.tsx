@@ -4,6 +4,7 @@
  * Main dashboard with key metrics and recent orders
  */
 
+import Link from 'next/link';
 import { DollarSign, ShoppingBag, Package, AlertTriangle } from 'lucide-react';
 
 export default function AdminDashboard() {
