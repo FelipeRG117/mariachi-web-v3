@@ -145,7 +145,8 @@ export class ProductService {
 
     // Filter by category
     if (filters.category) {
-      products = products.filter(p => p.category === filters.category)
+      const categoryFilter = filters.category
+      products = products.filter(p => p.category === categoryFilter)
     }
 
     // Filter by price range
