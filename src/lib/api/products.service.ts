@@ -158,8 +158,11 @@ export const isInStock = (product: Product): boolean => {
   if (product.status !== 'published') return false
   if (!product.variants || product.variants.length === 0) return true
 
-  // Check if any variant has stock
-  return product.variants.some((variant) => variant.stock > 0)
+  // Check if any variant has stock or allows backorder
+  return product.variants.some((variant) =>
+    variant.isActive &&
+    (!variant.inventory.trackInventory || variant.inventory.stock > 0 || variant.inventory.allowBackorder)
+  )
 }
 
 /**
