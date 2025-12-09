@@ -1,57 +1,10 @@
 "use client"
 
-
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { ChevronLeft, Minus, Plus, Share2 } from "lucide-react";
-
-
-// Modelo realista según backend
-
-interface ProductImage {
-  url: string;
-  publicId?: string;
-  altText?: string;
-  isPrimary?: boolean;
-  order?: number;
-}
-
-
-interface ProductVariant {
-  name: string;
-  sku?: string;
-  pricing?: {
-    basePrice: number;
-    [key: string]: number | undefined;
-  };
-  price?: number; // fallback for legacy
-  stock: number;
-  attributes?: {
-    size?: string;
-    color?: string;
-    [key: string]: string | undefined;
-  };
-}
-
-
-interface Product {
-  _id: string;
-  name: string;
-  price?: number; // fallback for legacy
-  category: string;
-  images?: ProductImage[];
-  variants?: ProductVariant[];
-  status: "draft" | "published" | "archived";
-  featured?: boolean;
-  badge?: string;
-  description?: string;
-  tracklist?: string[];
-  format?: string;
-  material?: string;
-  care?: string;
-}
-
+import type { Product, ProductVariant, ProductImage } from "@/types/business/product";
 
 interface ProductDetailProps {
   product: Product;
@@ -103,12 +56,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     ? [...product.images].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0) || (a.order ?? 0) - (b.order ?? 0))
     : [];
 
-  // Lógica de precio: preferir pricing.basePrice de la variante, luego price de variante, luego price de producto
+  // Lógica de precio: usar pricing.salePrice si existe, sino basePrice
   const getDisplayPrice = (): number => {
-    if (selectedVariant?.pricing?.basePrice != null) return selectedVariant.pricing.basePrice;
-    if (typeof selectedVariant?.price === "number") return selectedVariant.price;
-    if (typeof product.price === "number") return product.price;
-    return 0;
+    if (!selectedVariant) return 0;
+    return selectedVariant.pricing.salePrice || selectedVariant.pricing.basePrice;
   };
   const displayPrice = getDisplayPrice();
 
@@ -116,7 +67,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const handleQuantityChange = (delta: number) => {
     if (!selectedVariant) return;
     const newQuantity = quantity + delta;
-    const maxStock = typeof selectedVariant.stock === "number" ? selectedVariant.stock : 10;
+    const maxStock = selectedVariant.inventory.trackInventory ? selectedVariant.inventory.stock : 999;
     if (newQuantity >= 1 && newQuantity <= maxStock) {
       setQuantity(newQuantity);
     }
@@ -158,9 +109,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 className="object-cover"
                 priority
               />
-              {product.badge && (
+              {product.isFeatured && (
                 <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded">
-                  {product.badge}
+                  DESTACADO
+                </div>
+              )}
+              {product.isNewArrival && (
+                <div className="absolute top-4 right-4 bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded">
+                  NUEVO
                 </div>
               )}
             </div>
@@ -195,18 +151,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Divider */}
             <div className="border-t border-gray-200"></div>
 
-            {/* Format (para vinilos) */}
-            {product.format && (
-              <div>
-                <label className="block text-sm font-medium text-black mb-3 tracking-wider">Formato:</label>
-                <div className="w-full bg-gray-50 text-black border border-gray-300 rounded px-4 py-3">
-                  {product.format}
-                </div>
-              </div>
-            )}
-
             {/* Size Selection (para ropa) */}
-            {allSizes.length > 0 && !product.format && (
+            {allSizes.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-black mb-3 tracking-wider">Talla:</label>
                 <select
@@ -260,7 +206,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 />
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  disabled={quantity >= (selectedVariant?.stock ?? 10)}
+                  disabled={quantity >= (selectedVariant?.inventory.trackInventory ? selectedVariant.inventory.stock : 999)}
                   className="w-12 h-12 flex items-center justify-center border border-gray-600 rounded hover:border-[#d4a574] hover:text-[#d4a574] disabled:opacity-30 disabled:cursor-not-allowed text-black transition-all"
                 >
                   <Plus className="w-5 h-5" />
@@ -271,14 +217,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Add to Cart Button y validación de variantes */}
             {selectedVariant ? (
               <button
-                disabled={selectedVariant.stock === 0}
+                disabled={selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0}
                 className={`w-full py-4 rounded font-medium tracking-wider transition-all ${
-                  selectedVariant.stock === 0
+                  selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0
                     ? "bg-gray-400 text-gray-700 cursor-not-allowed"
                     : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
               >
-                {selectedVariant.stock === 0 ? "AGOTADO" : "AGREGAR AL CARRITO"}
+                {selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0 ? "AGOTADO" : "AGREGAR AL CARRITO"}
               </button>
             ) : (
               <div className="w-full py-4 rounded font-medium text-center bg-gray-200 text-gray-600">
@@ -287,7 +233,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             )}
 
             {/* Pickup Info */}
-            {selectedVariant && selectedVariant.stock > 0 && (
+            {selectedVariant && (!selectedVariant.inventory.trackInventory || selectedVariant.inventory.stock > 0) && (
               <div className="flex items-start gap-3 bg-gray-900 rounded p-4">
                 <svg
                   className="w-5 h-5 text-[#d4a574] mt-0.5 flex-shrink-0"
@@ -330,33 +276,33 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
-          {/* Tracklist (solo para vinilos) */}
-          {product.tracklist && product.tracklist.length > 0 && (
+          {/* Features */}
+          {product.features && product.features.length > 0 && (
             <div className="mb-12">
-              <h3 className="text-lg font-bold text-black mb-4 tracking-wider">TRACKLIST</h3>
-              <div className="space-y-2">
-                {product.tracklist.map((track, idx) => (
-                  <div key={idx} className="text-sm text-gray-700">
-                    <span className="font-bold">{String(idx + 1).padStart(2, "0")}.</span> {track}
+              <h3 className="text-lg font-bold text-black mb-4 tracking-wider">CARACTERÍSTICAS</h3>
+              <ul className="space-y-2">
+                {product.features.map((feature, idx) => (
+                  <li key={idx} className="text-sm text-gray-700 flex items-start">
+                    <span className="mr-2">•</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Specifications */}
+          {product.specifications && Object.keys(product.specifications).length > 0 && (
+            <div className="mb-12">
+              <h3 className="text-lg font-bold text-black mb-4 tracking-wider">ESPECIFICACIONES</h3>
+              <dl className="space-y-2">
+                {Object.entries(product.specifications).map(([key, value]) => (
+                  <div key={key} className="flex text-sm">
+                    <dt className="font-medium text-gray-900 w-1/3">{key}:</dt>
+                    <dd className="text-gray-700 w-2/3">{value}</dd>
                   </div>
                 ))}
-              </div>
-            </div>
-          )}
-
-          {/* Material (solo para ropa) */}
-          {product.material && (
-            <div className="mb-12">
-              <h3 className="text-lg font-bold text-black mb-4 tracking-wider">MATERIAL</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{product.material}</p>
-            </div>
-          )}
-
-          {/* Care Instructions (solo para ropa) */}
-          {product.care && (
-            <div className="mb-12">
-              <h3 className="text-lg font-bold text-black mb-4 tracking-wider">INSTRUCCIONES DE CUIDADO</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{product.care}</p>
+              </dl>
             </div>
           )}
         </div>
