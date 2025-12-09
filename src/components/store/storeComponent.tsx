@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ProductCard, ProductGridSkeleton, ProductsError } from "./products"
+import ProductCard from "./products/ProductCard"
+import { ProductGridSkeleton } from "./products/ProductCardSkeleton"
+import ProductsError from "./products/ProductsError"
 import { ProductService, type ProductSortBy } from "@/lib/services"
 import type { Product } from "@/types/business/product"
 
