@@ -15,7 +15,7 @@
  */
 
 import { productsService } from '@/lib/api/products.service'
-import type { Product, ProductFilters, ProductSortBy } from '@/types/business/product'
+import type { Product, ProductCategory, ProductFilters, ProductSortBy } from '@/types/business/product'
 
 /**
  * Product statistics
