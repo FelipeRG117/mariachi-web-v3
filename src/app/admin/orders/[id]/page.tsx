@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react';
 import { use } from 'react';
-import { ArrowLeft, Package, Truck, CheckCircle, XCircle, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowLeft, Package, Mail, Phone, MapPin } from 'lucide-react';
 import Link from 'next/link';
 
 interface Order {
@@ -24,7 +24,7 @@ interface Order {
     variant: {
       name: string;
       sku: string;
-      attributes: any;
+      attributes: Record<string, string | number | boolean>;
     };
     quantity: number;
     unitPrice: number;
@@ -72,10 +72,6 @@ export default function OrderDetailPage({
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
-  useEffect(() => {
-    fetchOrder();
-  }, [id]);
-
   const fetchOrder = async () => {
     try {
       const response = await fetch(`http://localhost:5000/api/orders/${id}`);
@@ -90,6 +86,11 @@ export default function OrderDetailPage({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const updateOrderStatus = async (newStatus: string) => {
     if (!order) return;

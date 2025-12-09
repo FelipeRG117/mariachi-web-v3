@@ -10,6 +10,15 @@ import { useState, useEffect } from 'react';
 import { Search, Filter, Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 
+interface OrderItem {
+  productSnapshot: {
+    name: string;
+  };
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
 interface Order {
   _id: string;
   orderNumber: string;
@@ -22,7 +31,7 @@ interface Order {
   };
   status: string;
   createdAt: string;
-  items: any[];
+  items: OrderItem[];
 }
 
 export default function AdminOrders() {

@@ -181,9 +181,9 @@ export default function AdminDashboard() {
           </table>
         </div>
         <div className="p-4 border-t border-gray-200">
-          <a href="/admin/orders" className="text-[#d4a574] hover:text-black font-medium text-sm">
+          <Link href="/admin/orders" className="text-[#d4a574] hover:text-black font-medium text-sm">
             Ver todas las órdenes →
-          </a>
+          </Link>
         </div>
       </div>
 
