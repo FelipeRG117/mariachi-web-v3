@@ -35,10 +35,11 @@ export type {
 // Product Service
 export { ProductService } from './product.service'
 export type {
-  ProductSortBy,
   ProductStats,
   GroupedProductsByCategory
 } from './product.service'
+// Export ProductSortBy from backend types (now centralized)
+export type { ProductSortBy } from '@/types/business/product'
 
 // Announcement Service
 export { AnnouncementService } from './announcement.service'
