@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useState, useEffect } from "react"
 import { ShoppingCart, User } from "lucide-react"
 import { useCartItemCount, useCartStore } from "@/lib/store/cart-store"
@@ -207,11 +208,15 @@ export default function NavBar() {
                 <div className="space-y-4">
                   {items.map((item) => (
                     <div key={item.product._id} className="flex gap-4 border-b border-gray-200 pb-4">
-                      <img
-                        src={item.product.images[0]?.url || "/placeholder.svg"}
-                        alt={item.product.name}
-                        className="w-20 h-20 object-cover rounded"
-                      />
+                      <div className="relative w-20 h-20 flex-shrink-0">
+                        <Image
+                          src={item.product.images[0]?.url || "/placeholder.svg"}
+                          alt={item.product.name}
+                          fill
+                          className="object-cover rounded"
+                          sizes="80px"
+                        />
+                      </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-sm">{item.product.name}</h3>
                         <p className="text-sm text-gray-500 mt-1">Cantidad: {item.quantity}</p>

@@ -22,7 +22,17 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
+    // Enable image optimization
+    formats: ['image/avif', 'image/webp'],
+    // Cache optimized images for 60 days
+    minimumCacheTTL: 60 * 60 * 24 * 60,
   },
 };
 
