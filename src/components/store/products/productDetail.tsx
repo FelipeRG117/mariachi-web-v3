@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronLeft, Minus, Plus, Share2 } from "lucide-react";
+import { ChevronLeft, Minus, Plus, Share2, ShoppingCart } from "lucide-react";
+import { useCartStore } from "@/lib/store/cart-store";
 import type { Product, ProductVariant, ProductImage } from "@/types/business/product";
 
 interface ProductDetailProps {
@@ -17,6 +18,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   // Estado para cantidad e imagen seleccionada
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<number>(0);
+  const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false);
+
+  // Cart store
+  const { addItem } = useCartStore();
 
   // Validación y extracción de tallas/colores
   const variants = Array.isArray(product?.variants) ? product.variants : [];
@@ -71,6 +76,22 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     if (newQuantity >= 1 && newQuantity <= maxStock) {
       setQuantity(newQuantity);
     }
+  };
+
+  // Agregar al carrito
+  const handleAddToCart = () => {
+    if (!selectedVariant || !product) return;
+
+    setIsAddingToCart(true);
+
+    // Agregar al carrito
+    addItem(product, quantity);
+
+    // Feedback visual
+    setTimeout(() => {
+      setIsAddingToCart(false);
+      setQuantity(1); // Reset cantidad
+    }, 500);
   };
 
   return (
@@ -217,14 +238,29 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Add to Cart Button y validación de variantes */}
             {selectedVariant ? (
               <button
-                disabled={selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0}
-                className={`w-full py-4 rounded font-medium tracking-wider transition-all ${
+                onClick={handleAddToCart}
+                disabled={isAddingToCart || (selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0)}
+                className={`w-full py-4 rounded font-medium tracking-wider transition-all flex items-center justify-center gap-2 ${
                   selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0
                     ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+                    : isAddingToCart
+                    ? "bg-green-500 text-white"
                     : "bg-blue-500 text-white hover:bg-blue-600"
                 }`}
               >
-                {selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0 ? "AGOTADO" : "AGREGAR AL CARRITO"}
+                {isAddingToCart ? (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>AGREGADO ✓</span>
+                  </>
+                ) : selectedVariant.inventory.trackInventory && selectedVariant.inventory.stock === 0 ? (
+                  "AGOTADO"
+                ) : (
+                  <>
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>AGREGAR AL CARRITO</span>
+                  </>
+                )}
               </button>
             ) : (
               <div className="w-full py-4 rounded font-medium text-center bg-gray-200 text-gray-600">
