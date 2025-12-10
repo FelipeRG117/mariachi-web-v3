@@ -25,8 +25,19 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   // Validación y extracción de tallas/colores
   const variants = Array.isArray(product?.variants) ? product.variants : [];
-  const allSizes: string[] = Array.from(new Set(variants.map(v => v.attributes?.size).filter(Boolean) as string[]));
-  const allColors: string[] = Array.from(new Set(variants.map(v => v.attributes?.color).filter(Boolean) as string[]));
+
+  // Helper function to filter out invalid values (N/A, empty, null, undefined)
+  const isValidAttribute = (value: string | undefined | null): value is string => {
+    if (!value) return false;
+    return value !== 'N/A' && value.trim() !== '';
+  };
+
+  const allSizes: string[] = Array.from(
+    new Set(variants.map(v => v.attributes?.size).filter(isValidAttribute) as string[])
+  );
+  const allColors: string[] = Array.from(
+    new Set(variants.map(v => v.attributes?.color).filter(isValidAttribute) as string[])
+  );
 
   // Estado para talla y color seleccionados
   const [selectedSize, setSelectedSize] = useState<string>(allSizes[0] || "");
