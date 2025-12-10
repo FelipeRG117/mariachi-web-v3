@@ -3,6 +3,8 @@ import { Geist, Geist_Mono, Bebas_Neue, Inter, Yusei_Magic, Playfair_Display_SC 
 import "./globals.css";
 import { NavBar } from "@/components";
 import FooterComponent from "@/components/FooterComponent";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { WebVitals } from "@/components/analytics/WebVitals";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -95,10 +97,16 @@ export default function RootLayout({
       <body
          className={`${geistSans.variable} ${geistMono.variable} ${bebas.variable} ${inter.variable} ${yusei_magic.variable} ${playfair_display_sc.variable} antialiased`}
       >
+        {/* Google Analytics 4 */}
+        <GoogleAnalytics />
+
+        {/* Web Vitals Reporter */}
+        <WebVitals />
+
         {/*<NavBar />*/}
-        
+
       {/* NavBar */}
-   
+
       {/* NavBar */}
       <div className="absolute top-0 left-0 w-full z-30">
         <NavBar />
