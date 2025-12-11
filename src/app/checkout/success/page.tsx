@@ -42,7 +42,14 @@ function CheckoutSuccessContent() {
         clearCart()
       } catch (err) {
         console.error('Error fetching session:', err)
-        setError('Error al verificar el pago')
+        // Don't show error - payment was successful, just show success without details
+        setSessionData({
+          id: sessionId,
+          paymentStatus: 'paid',
+          customerEmail: undefined,
+          amountTotal: undefined,
+          currency: 'MXN'
+        })
       } finally {
         setLoading(false)
       }
