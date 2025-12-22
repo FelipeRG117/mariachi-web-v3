@@ -15,7 +15,7 @@ import { z } from 'zod'
  * Validates complete concert data including venue, location, and ticket info.
  */
 export const ConcertSchema = z.object({
-  id: z.number().int().positive('Concert ID must be a positive integer'),
+  id: z.string().min(1, 'Concert ID is required'),
   date: z.string().regex(
     /^\d{4}-\d{2}-\d{2}$/,
     'Date must be in YYYY-MM-DD format'

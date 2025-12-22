@@ -15,6 +15,7 @@
 
 import { ConcertRepository } from '@/lib/repositories/concert.repository'
 import type { Concert, ConcertFilters, ConcertStats } from '@/types/business/concert.types'
+import { all } from 'axios'
 
 /**
  * Concert sort options
@@ -54,8 +55,25 @@ export class ConcertService {
    * @returns Array of concerts
    */
   static async getAll(sortBy: ConcertSortBy = 'date-asc'): Promise<Concert[]> {
-    const concerts = ConcertRepository.getAll()
+    try{
+      const response = await fetch(`http://localhost:5000/api/concerts`,{ cache: 'no-cache'} )
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      if (!result.success) {
+      throw new Error(result.error?.userMessage || 'Error fetching concerts')
+      }
+
+    const concerts = result.data
+    
     return this.sortConcerts(concerts, sortBy)
+    }catch(error){
+      console.error('Error fetching concerts:', error);
+      throw error
+    }
   }
 
   /**
@@ -64,7 +82,7 @@ export class ConcertService {
    * @param id - Concert ID
    * @returns Concert or null if not found
    */
-  static async getById(id: number): Promise<Concert | null> {
+  static async getById(id: string): Promise<Concert | null> {
     try {
       return ConcertRepository.getById(id)
     } catch {
@@ -79,8 +97,20 @@ export class ConcertService {
    * @returns Array of upcoming concerts sorted by date
    */
   static async getUpcoming(limit?: number): Promise<Concert[]> {
-    const concerts = ConcertRepository.getUpcoming()
-    return limit ? concerts.slice(0, limit) : concerts
+    const allConcerts = await this.getAll()
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const upcoming = allConcerts
+      .filter(concert => {
+        const concertDate = new Date(concert.date)
+        return concertDate >= today
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+    
+    return limit ? upcoming.slice(0, limit) : upcoming
   }
 
   /**

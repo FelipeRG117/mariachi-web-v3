@@ -7,6 +7,8 @@ export default async function ConcertsPage() {
   const concerts = await ConcertService.getUpcoming()
   const announcement = await AnnouncementService.getForPage('conciertos')
 
+
+
   return (
     <div className="w-full min-h-screen bg-[#e8e6e1] text-black">
       <AnnouncementModalWrapper announcement={announcement} />

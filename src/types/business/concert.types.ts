@@ -14,7 +14,7 @@
  */
 export interface Concert {
   /** Unique concert identifier */
-  id: number
+  id: string
   /** Concert date in ISO format (YYYY-MM-DD) */
   date: string
   /** Day of week abbreviated (e.g., "Sab", "Lun") */

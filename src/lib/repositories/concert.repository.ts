@@ -94,7 +94,7 @@ export class ConcertRepository {
    * @throws {ConcertRepositoryError} If concert not found
    * @returns Concert entity
    */
-  static getById(id: number): Concert {
+  static getById(id: string): Concert {
     const concerts = this.loadData()
     const concert = concerts.find(c => c.id === id)
 
@@ -210,7 +210,7 @@ export class ConcertRepository {
    * @param id - Concert ID
    * @returns True if concert exists
    */
-  static exists(id: number): boolean {
+  static exists(id: string): boolean {
     const concerts = this.loadData()
     return concerts.some(c => c.id === id)
   }
